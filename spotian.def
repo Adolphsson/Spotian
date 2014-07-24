@@ -1,0 +1,5 @@
+LIBRARY      "Spotian"
+DESCRIPTION  'A small Trillian plug-in to show currently played Spotify song in Trillian's status field. Works with both Astra and regular Trillian.'
+EXPORTS
+plugin_main				@1
+plugin_version			@2
