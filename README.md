@@ -1,7 +1,10 @@
-spotian
-=======
+# ![Spotian logo](http://adolphsson.se/media/2995/spotian.png) Spotian
 
 A small Trillian plug-in to show currently played Spotify song in Trillian's status field.
+
+![Preview of spotian in action](http://adolphsson.se/media/3382/spotifyintegration_preview.png)
+
+Trillian main window to the right and Spotify with the (optional) notification overlay to the left.
 
 Usage
 =====
