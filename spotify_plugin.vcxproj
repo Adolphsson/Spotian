@@ -153,27 +153,18 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="util.c">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="windows.c">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\util.c" />
+    <ClCompile Include="src\windows.c" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="spotian.rc" />
+    <ResourceCompile Include="src\spotian.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="plugin.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="spotify.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="src\plugin.h" />
+    <ClInclude Include="src\resource.h" />
+    <ClInclude Include="src\spotify.h" />
+    <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="spotian.def" />
