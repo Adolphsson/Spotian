@@ -94,7 +94,7 @@ int systrayAlertCallback(int windowID, char *subwindow, char *event, void *data,
 	// For now, we don't care about any of the other alert notifications, but
 	// in more advanced plugins, you'll usually want to at least use the
 	// alert_linkClick notification.
-	/* You mean like in this über advanced plugin? ;) */
+	/* You mean like in this Ã¼ber advanced plugin? ;) */
 	if (!_stricmp(event, "alert_linkClick"))
 	{
 		if(hWndSpotify = FindWindow("SpotifyMainWindow", 0))
