@@ -6,6 +6,10 @@ A small Trillian plug-in to show currently played Spotify song in Trillian's sta
 
 Trillian main window to the right and Spotify with the (optional) notification overlay to the left.
 
+Note!
+=====
+This plug-in is NOT working with the latest Spotify client since the Song and Artist information got removed from the window title of the client. Another way to read out this information would be to follow along with Toastify and use ChromeDriver (see http://toastify.codeplex.com/SourceControl/changeset/89968).
+
 Usage
 =====
 
