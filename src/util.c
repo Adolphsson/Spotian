@@ -444,14 +444,22 @@ int httpCallback(int windowID, char *subwindow, char *event, void *data, void *u
 	char* newVersion;
 	char* projectUrl;
 	char* productId;
+	int i;
 	struct http_result_t* result = (struct http_result_t*)data;
 
+	if (result->buffer_size < 1 || result->buffer == NULL)
+		return 0;
+
 	trillianInitialize(xml);
+
+	/* It seems like wehave no access to tha data at result->buffer,
+	I guess we'll have to disable this for now */
 	
+#if 0
 	xml.data = _strdup(result->buffer);
 
 	if (!plugin_send(MYGUID, "xmlGenerateTree", &xml)) {
-		tag = xml.root_tag;
+		tag = xml.root_tag; */
 		/* Decend to our root tag */
 		if(tag)
 			tag = tag->children;
@@ -490,6 +498,7 @@ int httpCallback(int windowID, char *subwindow, char *event, void *data, void *u
 		newVersion = NULL;
 
 		/* Ok, now search! */
+		
 		while(tag)
 		{
 			if(!strcmp(tag->type, "tag"))
@@ -523,6 +532,7 @@ int httpCallback(int windowID, char *subwindow, char *event, void *data, void *u
 	{
 		/* Silent fail */
 	}
+#endif
 
 	plugin_send(MYGUID, "xmlFreeTree", &xml);
 }

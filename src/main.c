@@ -386,7 +386,7 @@ int __declspec(dllexport)plugin_main(char *event, void *data)
 
 		pp.enabled						= 1; 
 		pp.pref_name					= "Spotian";
-		pp.sub_entry					= &pp_basic;
+		pp.sub_entry					= NULL; /*&pp_basic;*/
 
 		pp_advanced.sub_name			= "Basic"; 
 		/* pp_advanced.next				= &pp_advanced; */
