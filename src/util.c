@@ -592,8 +592,8 @@ void gen_random(char *s, const int len) {
 }
 
 int localport = -1;
-char oauth_token[69];
-char csrf_token[33];
+char *oauth_token = 0;
+char *csrf_token = 0;
 void getSpotifyUrl(char *s, int port, char *path)
 {
 	char subdomain[10];
@@ -603,20 +603,97 @@ void getSpotifyUrl(char *s, int port, char *path)
 	sprintf(s, "https://localhost:%d%s", port, path);
 }
 
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
+		strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+jsmntok_t * json_tokenise(char *js)
+{
+	jsmn_parser parser;
+	jsmn_init(&parser);
+
+	unsigned int n = 256;
+	jsmntok_t *tokens = malloc(sizeof(jsmntok_t) * n);
+	/*log_null(tokens);*/
+	if (tokens == 0)
+		MessageBox(0, "Tokens is null", 0, 0, 0);
+
+	int ret = jsmn_parse(&parser, js, /*strlen(js),*/ tokens, n);
+
+	while (ret == JSMN_ERROR_NOMEM)
+	{
+		n = n * 2 + 1;
+		tokens = realloc(tokens, sizeof(jsmntok_t) * n);
+		/*log_null(tokens);*/
+		if (tokens == 0)
+			MessageBox(0, "Tokens is null", 0, 0, 0);
+		ret = jsmn_parse(&parser, js, /*strlen(js),*/ tokens, n);
+	}
+
+	if (ret == JSMN_ERROR_INVAL)
+		/*log_die("jsmn_parse: invalid JSON string");*/
+		MessageBox(0, "jsmn_parse: invalid JSON string", 0, 0, 0);
+	if (ret == JSMN_ERROR_PART)
+		/*log_die("jsmn_parse: truncated JSON string");*/
+		MessageBox(0, "jsmn_parse: truncated JSON string", 0, 0, 0);
+
+	return tokens;
+}
+
+int parseroot(char* js, char* key, char** value)
+{
+	jsmntok_t *tokens = 0;
+	int i, j;
+	jsmn_parser parser;
+
+	tokens = json_tokenise(js);
+
+	for (i = 0, j = 1; j > 0; i++, j--)
+	{
+		if (tokens[i].start == -1 || tokens[i].end == -1)
+		{
+			MessageBox(0, "Should never reach uninitialized tokens", 0, 0, 0);
+			break;
+		}
+
+		if (tokens[i].type == JSMN_ARRAY || tokens[i].type == JSMN_OBJECT)
+			j += tokens[i].size;
+
+		if (jsoneq(js, &tokens[i], key) == 0) {
+			i++;
+			/* We may use strndup() to fetch string value */
+			if (*value) free(*value);
+			*value = (char*)malloc(tokens[i].end - tokens[i].start + 1);
+			sprintf(*value, "%.*s", tokens[i].end - tokens[i].start, js + tokens[i].start);
+			/*oauth_token = strndup(js + tokens[i + 1].start, tokens[i + 1].end - tokens[i + 1].start);*/
+
+			if (tokens)	free(tokens);
+			return 0;
+		}
+	}
+
+	if (tokens)	free(tokens);
+	return 1;
+}
+
 int httpOauthTokenCallback(int windowID, char *subwindow, char *event, void *data, void *userData)
 {
+	char* js = 0;
 	struct http_result_t* result = (struct http_result_t*)data;
-
+	
 	if (strcmp(event, "http_fileComplete") != 0)
 		return 0;
 	if (result->buffer_size < 1 || result->buffer == NULL)
 		return 0;
 
-	/*oauth_token = (char*)malloc(sizeof(char) * 69);
-	memcpy(*oauth_token, &(result->buffer)[6], 68);
-	*(oauth_token+68) = '\0';*/
-	memcpy(oauth_token, &(result->buffer)[6], 68);
-	oauth_token[68] = '\0';
+	js = _strdup(result->buffer);
+	parseroot(js, "t", &oauth_token);
+
+	if (js)	free(js);
 }
 
 void getOauthToken()
@@ -640,6 +717,7 @@ int indexOf(char *s, char ch)
 
 int httpCsrfCallback(int windowID, char *subwindow, char *event, void *data, void *userData)
 {
+	char* js = 0;
 	struct http_result_t* result = (struct http_result_t*)data;
 
 	if (strcmp(event, "http_fileComplete") != 0)
@@ -654,12 +732,11 @@ int httpCsrfCallback(int windowID, char *subwindow, char *event, void *data, voi
 		subbuff[4] = '\0';
 		localport = atoi(subbuff);
 	}
+	
+	js = _strdup(result->buffer);
+	parseroot(js, "token", &csrf_token);
 
-	/*csrf_token = (char*)malloc(sizeof(char) * 33);
-	memcpy(*csrf_token, &(result->buffer)[12], 32);
-	*(csrf_token + 32) = '\0';*/
-	memcpy(csrf_token, &(result->buffer)[12], 32);
-	csrf_token[32] = '\0';
+	if (js)	free(js);
 }
 
 void getCsrfToken()
@@ -699,47 +776,6 @@ void getCsrfToken()
 		req->http_header = "Origin: https://open.spotify.com";
 		plugin_send(MYGUID, "httpFileRequest", req);
 	}
-}
-
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-	if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
-		strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-		return 0;
-	}
-	return -1;
-}
-
-jsmntok_t * json_tokenise(char *js)
-{
-	jsmn_parser parser;
-	jsmn_init(&parser);
-
-	unsigned int n = 256;
-	jsmntok_t *tokens = malloc(sizeof(jsmntok_t) * n);
-	/*log_null(tokens);*/
-	if (tokens == 0)
-		MessageBox(0, "Tokens is null", 0, 0, 0);
-
-	int ret = jsmn_parse(&parser, js, /*strlen(js),*/ tokens, n);
-	
-	while (ret == JSMN_ERROR_NOMEM)
-	{
-		n = n * 2 + 1;
-		tokens = realloc(tokens, sizeof(jsmntok_t) * n);
-		/*log_null(tokens);*/
-		if (tokens == 0)
-			MessageBox(0, "Tokens is null", 0, 0, 0);
-		ret = jsmn_parse(&parser, js, /*strlen(js),*/ tokens, n);
-	}
-	
-	if (ret == JSMN_ERROR_INVAL)
-		/*log_die("jsmn_parse: invalid JSON string");*/
-		MessageBox(0, "jsmn_parse: invalid JSON string", 0, 0, 0);
-	if (ret == JSMN_ERROR_PART)
-		/*log_die("jsmn_parse: truncated JSON string");*/
-		MessageBox(0, "jsmn_parse: truncated JSON string", 0, 0, 0);
-
-	return tokens;
 }
 
 int json_token_streq(char *js, jsmntok_t *t, char *s)

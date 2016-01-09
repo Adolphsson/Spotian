@@ -55,13 +55,13 @@ STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Enable song notifications",IDC_NOTIFS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,95,10
-    CONTROL         "Check for updates",IDC_UPDATE_CHECK,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,23,75,10
+    CONTROL         "Check for updates",IDC_UPDATE_CHECK,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,7,23,75,10
     CONTROL         "/song should be replaced by current song",IDC_NAME_KEY_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,39,149,10
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,7,39,149,10
     CONTROL         "/songurl should be replaced by a link to the current song",IDC_URL_KEY_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,55,196,10
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,7,55,196,10
     CONTROL         "Ignore Spotify ads (Experimental)",IDC_IGNORE_ADS_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,71,124,10
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,7,71,124,10
 END
 
 IDD_ADVANCED_DIALOG DIALOGEX 0, 0, 316, 183
@@ -116,8 +116,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,1
- PRODUCTVERSION 2,0,0,1
+ FILEVERSION 2,0,0,2
+ PRODUCTVERSION 2,0,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x3L
@@ -134,12 +134,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Christoffer Adolphsson"
             VALUE "FileDescription", "A small Trillian plug-in to show currently played Spotify song in Trillian's status field. Works with Trillian version 2.0 and up."
-            VALUE "FileVersion", "2.0.0.1a"
+            VALUE "FileVersion", "2.0.0.2a"
             VALUE "InternalName", "Spotian"
             VALUE "LegalCopyright", "Copyright (C) 2016"
             VALUE "OriginalFilename", "spotian.dll"
             VALUE "ProductName", "Spotian"
-            VALUE "ProductVersion", "2.0.0.1a"
+            VALUE "ProductVersion", "2.0.0.2a"
         END
     END
     BLOCK "VarFileInfo"
