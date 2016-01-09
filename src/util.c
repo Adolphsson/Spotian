@@ -1070,13 +1070,12 @@ char *str_replace(char *orig, char *rep, char *with) {
 	return result;
 }
 
-
+char* chOldSong = 0;
 int httpSpotifyCallback(int windowID, char *subwindow, char *event, void *data, void *userData)
 {
 	char* js = 0;
 
-	/*char* chNewSong = 0;
-	char* chOldSong = 0;*/
+	char* chNewSong = 0;
 	char* chArtist = 0;
 	char* chAlbum = 0;
 	char* chSong = 0;
@@ -1126,32 +1125,42 @@ int httpSpotifyCallback(int windowID, char *subwindow, char *event, void *data, 
 	meh[2].variable_name = "album";
 	meh[2].variable_data = "";
 	meh[2].variable_size = 0;
-	
-	if (chSong)
-	{
-		alert.type = "music";
-		alert.callback = systrayAlertCallback;
 
-		chSongAlert = (char*)malloc(strlen(chSong)+1);
-		chSongAlert[strlen(chSong)] = '\0';
-		strcpy(chSongAlert, chSong);
-		alert.text = chSongAlert;
-		alert.data = chSongAlert;
-		if (chSong[0] != '\0')
-		{
-			if (m_config.enable_notifications)
-				plugin_send(MYGUID, "systraySetAlert", &alert);
-		}
-	}
+	if (chNewSong) free(chNewSong);
+	chNewSong = (char*)malloc(strlen(chSong) + 4 + strlen(chAlbum) + 4 + strlen(chArtist) + 1);
+	sprintf(chNewSong, "%s<br>%s<br>%s", chArtist, chSong, chAlbum);
 	
 	if (isPlaying)
 	{
-		statEvent.variables[0].variable_data = chSong;
-		statEvent.variables[0].variable_size = strlen(chSong);
-		statEvent.variables[1].variable_data = chArtist;
-		statEvent.variables[1].variable_size = strlen(chArtist);
-		statEvent.variables[2].variable_data = chAlbum;
-		statEvent.variables[2].variable_size = strlen(chAlbum);
+		if (chOldSong == 0 || strcmp(chOldSong, chNewSong) != 0)
+		{
+			alert.type = "music";
+			alert.callback = systrayAlertCallback;
+
+			chSongAlert = (char*)malloc(strlen(chNewSong) + 1);
+			chSongAlert[strlen(chNewSong)] = '\0';
+			strcpy(chSongAlert, chNewSong);
+			alert.text = chSongAlert;
+			/*alert.data = chSongAlert;*/
+			if (chNewSong[0] != '\0')
+			{
+				if (m_config.enable_notifications)
+					plugin_send(MYGUID, "systraySetAlert", &alert);
+			}
+
+			statEvent.variables[0].variable_data = chSong;
+			statEvent.variables[0].variable_size = strlen(chSong);
+			statEvent.variables[1].variable_data = chArtist;
+			statEvent.variables[1].variable_size = strlen(chArtist);
+			statEvent.variables[2].variable_data = chAlbum;
+			statEvent.variables[2].variable_size = strlen(chAlbum);
+
+			plugin_send(MYGUID, "eventsGenerate", &statEvent);
+
+			if (chOldSong) free(chOldSong);
+			chOldSong = (char*)malloc(strlen(chSong) + 4 + strlen(chAlbum) + 4 + strlen(chArtist) + 1);
+			sprintf(chOldSong, "%s<br>%s<br>%s", chArtist, chSong, chAlbum);
+		}
 	}
 	else
 	{
@@ -1161,14 +1170,17 @@ int httpSpotifyCallback(int windowID, char *subwindow, char *event, void *data, 
 		statEvent.variables[1].variable_size = 0;
 		statEvent.variables[2].variable_data = "";
 		statEvent.variables[2].variable_size = 0;
+
+		plugin_send(MYGUID, "eventsGenerate", &statEvent);
 	}
-	plugin_send(MYGUID, "eventsGenerate", &statEvent);
+	
 	
 	/*
 if (chOldSong)	free(chOldSong);
 chOldSong = (char*)malloc(val[i].len - 1);
 strcpy(chOldSong, chNewSong);*/
 	
+	if (chNewSong)		free(chNewSong);
 	if (chArtist)		free(chArtist);
 	if (chAlbum)		free(chAlbum);
 	if (chSong)			free(chSong);
@@ -1181,12 +1193,6 @@ strcpy(chOldSong, chNewSong);*/
 void CheckSpotify(int eventID)
 {
 	int length;
-	char* chNewSong = 0;
-	char* chOldSong = 0;
-	char* chArtist = 0;
-	char* chAlbum = 0;
-	char* chSong = 0;
-	char* chSongAlert = 0;
 	int* hWndSpotify = 0;
 	int i;
 	char* encodedArtist = 0;
@@ -1246,18 +1252,12 @@ void CheckSpotify(int eventID)
 			hr.http_header = "Origin: https://open.spotify.com";
 			hr.callback = httpSpotifyCallback;
 			hr.content_type = 
-			sprintf(hr.url, "%s?oauth=%s&csrf=%s&returnafter=1&returnon=login%%2Clogout%%2Cplay%%2Cpause%%2Cerror%%2Cap", hr.url, oauth_token, csrf_token);
+			sprintf(hr.url, "%s?oauth=%s&csrf=%s&returnafter=0&returnon=login%%2Clogout%%2Cplay%%2Cpause%%2Cerror%%2Cap", hr.url, oauth_token, csrf_token);
 			plugin_send(MYGUID, "httpFileRequest", &hr);
 		}
 
 		Sleep(5000);
 	}
-
-	if(chNewSong)		free(chNewSong);
-	if(chOldSong)		free(chOldSong);
-	if(chSong)	free(chSong);
-	if(chAlbum)	free(chAlbum);
-	if(chArtist)	free(chArtist);
 
 	//plugin_send(MYGUID, "eventsStatusUnregister", &statEvent);
 
